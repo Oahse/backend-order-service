@@ -1,30 +1,10 @@
 # backend-order-service
 
-Order Service Core Features
-Order Processing
+Order Service
+Handles the entire lifecycle of customer orders. It manages order creation, status tracking (e.g., pending, shipped, delivered), item details, quantities, pricing, and total amounts. This service validates orders, updates inventory status, and maintains the relationship between users and their purchased items.
 
-Create new orders from carts
-
-Validate inventory before order confirmation
-
-Update order status (pending, paid, shipped, delivered, cancelled)
-
-Payment Integration
-
-Handle payment confirmation and failure callbacks
-
-Store payment transaction details
-
-Order History
-
-Retrieve user’s order history
-
-Track shipment and delivery status
-
-Refunds and Cancellations
+Payment Service
+Processes payment transactions for orders. It supports multiple payment methods (credit cards, PayPal, etc.), tracks payment status (pending, completed, refunded), and manages transaction details including currency, amounts, and refunds. This service integrates with external payment gateways securely and ensures financial data integrity and compliance.
 
 Support order cancellation and refund requests
 
-Notifications
-
-Notify users about order status changes (email, push)
