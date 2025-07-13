@@ -20,6 +20,11 @@ class OrderService:
 
     async def create_order(self,order_in: OrderSchema) -> Order:
         try:
+            #   a. Order Confirmation from products service
+            #.  b. if exists:
+            #           Updates inventory accordingly.(decrease item count on the service)
+            #.     else : raise e
+            #      Order status: Pending → Processing
             order_id = str(generator.get_id())
             order = Order(id = order_id, 
                 user_id=order_in.user_id, 

@@ -68,6 +68,7 @@ class KafkaConsumer:
                             # )
                             # if payment.to_dict():
                             #     logging.info(f"Payment-{payment_id} made on: {order_data['id']}")
+                            
                             pass
                 except Exception as inner_ex:
                     logging.error(f"[Kafka Consumer] Error processing message: {inner_ex}")
