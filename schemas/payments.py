@@ -8,12 +8,22 @@ class PaymentMethod(str, Enum):
     CreditCard = "CreditCard"
     DebitCard = "DebitCard"
     BankTransfer = "BankTransfer"
+    ACH = "ACH"                      # US
+    SEPA = "SEPA"                    # EU
     Paypal = "Paypal"
     ApplePay = "ApplePay"
     GooglePay = "GooglePay"
+    UPI = "UPI"                      # India
+    Alipay = "Alipay"                # China
+    WeChatPay = "WeChatPay"          # China
+    MobileMoney = "MobileMoney"      # Africa (e.g. M-Pesa)
     CashOnDelivery = "CashOnDelivery"
     Crypto = "Crypto"
+    GiftCard = "GiftCard"
+    BuyNowPayLater = "BuyNowPayLater"  # Klarna, Affirm etc.
+    StoreCredit = "StoreCredit"      # Internal credit or loyalty points
     Other = "Other"
+
 
 
 class PaymentStatus(str, Enum):

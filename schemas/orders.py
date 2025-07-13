@@ -15,19 +15,16 @@ class OrderStatus(str, Enum):
 
 
 class OrderItemSchema(BaseModel):
-    id: str
-    order_id: str
     product_id: str
     quantity: int
     price_per_unit: float
-    total_price: float
+    total_price: Optional[float]
 
     class Config:
         from_attributes = True
 
 
 class OrderSchema(BaseModel):
-    id: str
     user_id: str
     status: OrderStatus
     total_amount: float
@@ -35,6 +32,23 @@ class OrderSchema(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     items: List[OrderItemSchema] = []
+
+    class Config:
+        from_attributes = True
+
+class OrderFilterSchema(BaseModel):
+    user_id: Optional[str] = None
+    status: Optional[OrderStatus] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    limit: int = 10
+    offset: int = 0
+
+class UpdateOrderSchema(BaseModel):
+    status: Optional[OrderStatus] = None           # e.g. from Pending → Completed
+    currency: Optional[str] = None                 # if allowed
+    total_amount: Optional[float] = None           # only if it's a draft or editable order
+    items: Optional[List[OrderItemSchema]] = None  # only if you're allowing item updates
 
     class Config:
         from_attributes = True

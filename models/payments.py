@@ -6,17 +6,26 @@ from typing import Optional
 from uuid import uuid4
 from core.database import Base, CHAR_LENGTH
 
-
 class PaymentMethod(PyEnum):
     CreditCard = "CreditCard"
     DebitCard = "DebitCard"
     BankTransfer = "BankTransfer"
+    ACH = "ACH"                      # US
+    SEPA = "SEPA"                    # EU
     Paypal = "Paypal"
     ApplePay = "ApplePay"
     GooglePay = "GooglePay"
+    UPI = "UPI"                      # India
+    Alipay = "Alipay"                # China
+    WeChatPay = "WeChatPay"          # China
+    MobileMoney = "MobileMoney"      # Africa (e.g. M-Pesa)
     CashOnDelivery = "CashOnDelivery"
     Crypto = "Crypto"
+    GiftCard = "GiftCard"
+    BuyNowPayLater = "BuyNowPayLater"  # Klarna, Affirm etc.
+    StoreCredit = "StoreCredit"      # Internal credit or loyalty points
     Other = "Other"
+
 
 
 class PaymentStatus(PyEnum):
@@ -32,10 +41,9 @@ class PaymentStatus(PyEnum):
 class Payment(Base):
     __tablename__ = "payments"
 
-    id: Mapped[str] = mapped_column(String(CHAR_LENGTH), primary_key=True, default=lambda: str(uuid4()))
-    order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), nullable=False)
-    order = relationship("Order", back_populates="payments")
-
+    id: Mapped[str] = mapped_column(String(CHAR_LENGTH), primary_key=True)
+    order_id: Mapped[Optional[str]] = mapped_column(String(CHAR_LENGTH), nullable=True)
+    
     user_id: Mapped[Optional[str]] = mapped_column(String(CHAR_LENGTH), nullable=True)
 
     method: Mapped[PaymentMethod] = mapped_column(Enum(PaymentMethod), nullable=False)
@@ -56,7 +64,7 @@ class Payment(Base):
 
     # For partial refunds or multiple payment attempts
     parent_payment_id: Mapped[Optional[str]] = mapped_column(String(CHAR_LENGTH), ForeignKey("payments.id"), nullable=True)
-    parent_payment = relationship("Payment", remote_side=[id])
+    
     def to_dict(self) -> dict:
         return {
             "id": self.id,
@@ -72,8 +80,6 @@ class Payment(Base):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "refunded_amount": float(self.refunded_amount) if self.refunded_amount is not None else 0,
             "parent_payment_id": self.parent_payment_id,
-            # Optional: if you want to include minimal parent payment info:
-            "parent_payment": {"id": self.parent_payment.id} if self.parent_payment else None
         }
     def __repr__(self):
         return f"<Payment(id={self.id}, order_id={self.order_id}, method={self.method}, status={self.status}, amount={self.amount} {self.currency})>"

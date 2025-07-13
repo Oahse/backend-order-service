@@ -38,7 +38,7 @@ class OrderStatus(PyEnum):
 class Order(Base):
     __tablename__ = "orders"
 
-    id: Mapped[str] = mapped_column(String(CHAR_LENGTH), primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[str] = mapped_column(String(CHAR_LENGTH), primary_key=True)
     user_id: Mapped[str] = mapped_column(String(CHAR_LENGTH), nullable=False)
     status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.Pending, nullable=False)
 
@@ -69,7 +69,7 @@ class Order(Base):
 class OrderItem(Base):
     __tablename__ = "order_items"
 
-    id: Mapped[str] = mapped_column(String(CHAR_LENGTH), primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[str] = mapped_column(String(CHAR_LENGTH), primary_key=True)
     order_id: Mapped[str] = mapped_column(ForeignKey("orders.id"), nullable=False)
     order: Mapped["Order"] = relationship("Order", back_populates="items")
 

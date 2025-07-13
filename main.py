@@ -1,20 +1,18 @@
 from fastapi import FastAPI, Request
 from core.config import Settings
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.cors import CORSMiddleware
-from core.database import get_elastic_db,get_elastic_db_sync # Your async Elasticsearch instance
-from routes.products import router as product_router
-from routes.category import router as category_router
-from routes.inventory import router as inventory_router
-from routes.promocode import router as promocode_router
-from routes.tag import router as tag_router
+from routes.orders import router as order_router
+from routes.payments import router as payment_router
+from core.database import get_db 
 from core.utils.response import Response, RequestValidationError 
 from core.utils.kafka import KafkaConsumer,KafkaProducer ,is_kafka_available
-import asyncio
+import asyncio, logging
 
 
 app = FastAPI(
-    title="Product Service API",
+    title="Order and Payment Service API",
     description="Handles Product operations.",
     version="1.0.0"
 )
@@ -27,7 +25,7 @@ kafka_consumer = KafkaConsumer(
     broker=",".join(settings.KAFKA_BOOTSTRAP_SERVERS),
     topic=str(settings.KAFKA_TOPIC),
     group_id=str(settings.KAFKA_GROUP),
-    es=get_elastic_db_sync()
+    db: AsyncSession = Depends(get_db),
 )
 
 kafka_producer = KafkaProducer(broker=settings.KAFKA_BOOTSTRAP_SERVERS,
@@ -51,17 +49,14 @@ if settings.BACKEND_CORS_ORIGINS:
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # Register all routers (API route groups) for different resources
-app.include_router(product_router)
-app.include_router(category_router)
-app.include_router(inventory_router)
-app.include_router(promocode_router)
-app.include_router(tag_router)
+app.include_router(order_router)
+app.include_router(payment_router)
 
 # Basic health endpoint to check if service is running
 @app.get("/")
 async def read_root():
     return {
-        "service": "Products Service API",
+        "service": "Order Service API",
         "status": "Running",
         "version": "1.0.0"
     }
@@ -97,27 +92,20 @@ async def startup():
         await kafka_consumer.start()
         consumer_task = asyncio.create_task(kafka_consumer.consume())
 
-        print("Kafka consumer started.")
-        await kafka_producer.start()
-        await kafka_producer.send({
-            "product": {"id": "abc123", "name": "Test Product"},
-            "action": "create"
-        })
-
     except Exception as e:
-        print(f"Failed to start Kafka consumer: {e}")
+        logging.critical(f"Failed to start Kafka consumer: {e}")
         await kafka_consumer.stop()
-    try:
-        esclient = await get_elastic_db()
-        await esclient.info()
-    except Exception as e:
-        print(f"Failed to start elastic search db: {e}")
+        await kafka_producer.stop()
 
+    
+    logging.info("App started")
 
 # FastAPI event handler triggered on application shutdown
 @app.on_event("shutdown")
 async def shutdown():
     # Stop Kafka consumer gracefully
     await kafka_consumer.stop()
-    print("Kafka consumer stopped.")
+    logging.critical("Kafka consumer stopped.")
+    await kafka_producer.stop()
+    logging.critical("Kafka producer stopped.")
     

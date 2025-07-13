@@ -7,4 +7,3 @@ Payment Service
 Processes payment transactions for orders. It supports multiple payment methods (credit cards, PayPal, etc.), tracks payment status (pending, completed, refunded), and manages transaction details including currency, amounts, and refunds. This service integrates with external payment gateways securely and ensures financial data integrity and compliance.
 
 Support order cancellation and refund requests
-

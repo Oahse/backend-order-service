@@ -24,28 +24,7 @@ services:
       timeout: 10s
       start_period: 30s
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false  # Disable auth for dev
-    
-    volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-    networks:
-      - webnet
-    healthcheck:
-      test: curl -fs http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=30s || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-
-
+  
   postgres:
     image: postgres:16-alpine
     container_name: postgres
@@ -68,18 +47,17 @@ services:
       start_period: 30s
       timeout: 10s
 
-  productsservice:
+  orderservice:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: productsservice
+    container_name: orderservice
     depends_on:
       kafka:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
+      
     ports:
       - "8000:8000"
     networks:
@@ -98,6 +76,4 @@ networks:
 
 volumes:
   postgres-data:
-    external: false
-  elasticsearch-data:
-    external: false
+    external: true  # Create it manually with docker volume create

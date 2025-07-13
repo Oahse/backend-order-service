@@ -1,5 +1,6 @@
 # models/__init__.py
-from .products import Tag, Category, Product, ProductImage, ProductVariant, Inventory
+from .orders import Order, OrderItem
+from .payments import Payment
 # import other models too...
 
 from core.database import Base,engine_db  # or wherever your Base is defined
